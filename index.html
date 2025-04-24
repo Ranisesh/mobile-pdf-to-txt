@@ -3,11 +3,9 @@
 <head>
     <title>SeshRani PDF to Text Converter</title>
     <style>
-        @<style>
     body {
         font-family: Arial, sans-serif;
         margin: 2rem;
-	font - size: 1.4;
         background-color: #f9f9f9;
     }
 
@@ -29,15 +27,17 @@
     input[type="file"] {
         display: block;
         margin: 1rem auto;
+        font-size: 1.4rem;
+        padding: 1rem;
     }
 
     button {
         display: block;
-        margin: 0.5rem auto;
-        padding: 0.6rem 1.2rem;
-        font-size: 1rem;
+        margin: 0.8rem auto;
+        padding: 1rem 2rem;
+        font-size: 1.4rem;
         border: none;
-        border-radius: 6px;
+        border-radius: 8px;
         background-color: #4CAF50;
         color: white;
         cursor: pointer;
@@ -79,20 +79,25 @@
         }
 
         h1 {
-            font-size: 1.5rem;
+            font-size: 2rem;
+        }
+
+        input[type="file"] {
+            font-size: 1.6rem;
+            padding: 1.2rem;
         }
 
         button {
+            font-size: 1.6rem;
+            padding: 1.2rem 2.4rem;
             width: 100%;
-            font-size: 1rem;
         }
 
         pre#output {
-            font-size: 0.95rem;
+            font-size: 1.1rem;
         }
     }
-</style>
-
+    </style>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
 </head>
@@ -150,20 +155,17 @@
                     const page = await pdf.getPage(i);
                     const textContent = await page.getTextContent();
 
-                    // Format text
                     const pageText = textContent.items
                         .map(item => item.str)
-                        .join(' ') // Join words with spaces
-                        .replace(/\s+/g, ' ') // Remove multiple spaces
-                        .replace(/(\n){2,}/g, '\n\n'); // Preserve paragraph breaks
+                        .join(' ')
+                        .replace(/\s+/g, ' ')
+                        .replace(/(\n){2,}/g, '\n\n');
 
                     fullText += `Page ${i}:\n${pageText}\n\n`;
                 }
 
-                // Display formatted text
                 output.textContent = fullText;
 
-                // Create downloadable file
                 const blob = new Blob([fullText], { type: 'text/plain' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
