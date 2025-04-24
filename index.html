@@ -1,90 +1,89 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document to HTML Converter</title>
-  <style>
-    body { 
-      font-family: Arial, sans-serif; 
-      padding: 2rem;
-      font-size: 1.2rem; 
-    }
-    .container { max-width: 800px; margin: auto; }
-    textarea { width: 100%; height: 300px; margin-bottom: 1rem; }
-    button { padding: 0.5rem 1rem; font-size: 1rem; cursor: pointer; }
-    iframe { width: 100%; height: 400px; border: 1px solid #ccc; margin-top: 1rem; }
-
-    @media (max-width: 600px) {
-      body {
-        font-size: 1.3rem;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>Document to HTML Converter</h1>
-    <p>Paste your document text below. This version auto-converts lines to HTML with headings and line breaks.</p>
-    <textarea id="docInput" placeholder="Paste your text here..."></textarea>
-    <br>
-    <button onclick="convertToHTML()">Convert to HTML</button>
-    <button onclick="downloadHTML()">Download HTML</button>
-    <iframe id="preview"></iframe>
-  </div>
-
-  <script>
-    function formatText(input) {
-      const lines = input.trim().split(/\r?\n/).filter(line => line.trim() !== '');
-      let html = '';
-
-      if (lines.length > 0) {
-        html += `<h1>${lines[0]}</h1>`;
-      }
-      if (lines.length > 1) {
-        html += `<h2>${lines[1]}</h2>`;
-      }
-      for (let i = 2; i < lines.length; i++) {
-        html += `<p>${lines[i]}</p>`;
-      }
-      return html;
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 2rem;
+        background-color: #f9f9f9;
     }
 
-    function convertToHTML() {
-      const inputText = document.getElementById('docInput').value;
-      const formatted = formatText(inputText);
-
-      const htmlDoc = `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset='UTF-8'>
-  <meta name='viewport' content='width=device-width, initial-scale=1.0'>
-  <title>Converted Document</title>
-</head>
-<body>
-${formatted}
-</body>
-</html>`;
-
-      const iframe = document.getElementById('preview');
-      const doc = iframe.contentDocument || iframe.contentWindow.document;
-      doc.open();
-      doc.write(htmlDoc);
-      doc.close();
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 1rem;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     }
 
-    function downloadHTML() {
-      const inputText = document.getElementById('docInput').value;
-      const formatted = formatText(inputText);
-      const blob = new Blob([
-        `<!DOCTYPE html>\n<html>\n<head>\n<meta charset='UTF-8'>\n<meta name='viewport' content='width=device-width, initial-scale=1.0'>\n<title>Converted Document</title>\n</head>\n<body>\n${formatted}\n</body>\n</html>`
-      ], { type: 'text/html' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = 'converted-document.html';
-      link.click();
-      URL.revokeObjectURL(link.href);
+    h1 {
+        text-align: center;
+        font-size: 2rem;
+        margin-bottom: 1rem;
     }
-  </script>
-</body>
-</html>
+
+    input[type="file"] {
+        display: block;
+        margin: 1rem auto;
+    }
+
+    button {
+        display: block;
+        margin: 0.5rem auto;
+        padding: 0.6rem 1.2rem;
+        font-size: 1rem;
+        border: none;
+        border-radius: 6px;
+        background-color: #4CAF50;
+        color: white;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #45a049;
+    }
+
+    #status-labels {
+        text-align: center;
+        margin: 1rem 0;
+        font-weight: bold;
+    }
+
+    .status-inactive {
+        color: #bbb;
+    }
+
+    pre#output {
+        background: #f0f0f0;
+        padding: 1rem;
+        border-radius: 8px;
+        max-height: 400px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        font-size: 1rem;
+        line-height: 1.4;
+    }
+
+    @media (max-width: 768px) {
+        body {
+            margin: 1rem;
+        }
+
+        .container {
+            padding: 1rem 0.5rem;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+        }
+
+        button {
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        pre#output {
+            font-size: 0.95rem;
+        }
+    }
+</style>
+
