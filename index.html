@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SeshRani PDF to Text Converter</title>
+    <style>
+        @<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 2rem;
+        background-color: #f9f9f9;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 1rem;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    h1 {
+        text-align: center;
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    input[type="file"] {
+        display: block;
+        margin: 1rem auto;
+    }
+
+    button {
+        display: block;
+        margin: 0.5rem auto;
+        padding: 0.6rem 1.2rem;
+        font-size: 1rem;
+        border: none;
+        border-radius: 6px;
+        background-color: #4CAF50;
+        color: white;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #45a049;
+    }
+
+    #status-labels {
+        text-align: center;
+        margin: 1rem 0;
+        font-weight: bold;
+    }
+
+    .status-inactive {
+        color: #bbb;
+    }
+
+    pre#output {
+        background: #f0f0f0;
+        padding: 1rem;
+        border-radius: 8px;
+        max-height: 400px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        font-size: 1rem;
+        line-height: 1.4;
+    }
+
+    @media (max-width: 768px) {
+        body {
+            margin: 1rem;
+        }
+
+        .container {
+            padding: 1rem 0.5rem;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+        }
+
+        button {
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        pre#output {
+            font-size: 0.95rem;
+        }
+    }
+</style>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>PDF to Text Converter</h1>
+        <input type="file" id="pdfInput" accept=".pdf" onchange="resetStatus()">
+        <button onclick="processPDF()">Convert to Text</button>
+        <div id="status-labels">
+            <span id="uploading-status" class="status-inactive">Uploading</span>
+            <span id="processing-status" class="status-inactive">Processing</span>
+            <span id="ready-status" class="status-inactive">Ready</span>
+        </div>
+        <pre id="output"></pre>
+    </div>
+
+    <script>
+        const uploadingLabel = document.getElementById('uploading-status');
+        const processingLabel = document.getElementById('processing-status');
+        const readyLabel = document.getElementById('ready-status');
+        const output = document.getElementById('output');
+
+        function resetStatus() {
+            uploadingLabel.classList.add('status-inactive');
+            processingLabel.classList.add('status-inactive');
+            readyLabel.classList.add('status-inactive');
+            output.textContent = '';
+        }
+
+        async function processPDF() {
+            const fileInput = document.getElementById('pdfInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Please select a PDF file');
+                return;
+            }
+
+            resetStatus();
+            uploadingLabel.classList.remove('status-inactive');
+
+            try {
+                const arrayBuffer = await file.arrayBuffer();
+                uploadingLabel.classList.add('status-inactive');
+                processingLabel.classList.remove('status-inactive');
+
+                const pdfData = new Uint8Array(arrayBuffer);
+
+                // Initialize PDF.js
+                const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
+                let fullText = '';
+
+                // Extract text from each page
+                for (let i = 1; i <= pdf.numPages; i++) {
+                    const page = await pdf.getPage(i);
+                    const textContent = await page.getTextContent();
+
+                    // Format text
+                    const pageText = textContent.items
+                        .map(item => item.str)
+                        .join(' ') // Join words with spaces
+                        .replace(/\s+/g, ' ') // Remove multiple spaces
+                        .replace(/(\n){2,}/g, '\n\n'); // Preserve paragraph breaks
+
+                    fullText += `Page ${i}:\n${pageText}\n\n`;
+                }
+
+                // Display formatted text
+                output.textContent = fullText;
+
+                // Create downloadable file
+                const blob = new Blob([fullText], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${file.name.replace('.pdf', '')}_converted.txt`;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                processingLabel.classList.add('status-inactive');
+                readyLabel.classList.remove('status-inactive');
+
+            } catch (error) {
+                processingLabel.classList.add('status-inactive');
+                readyLabel.textContent = `Error: ${error.message}`;
+                readyLabel.classList.remove('status-inactive');
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>
